@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styles from "./AvatarSelection.module.css";
+import { Sprout } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
@@ -52,6 +53,11 @@ export function AvatarSelection({ userName, onComplete }: AvatarSelectionProps) 
 
   return (
     <div className={styles.container}>
+      <div className={styles.logo}>
+        <div className="bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
+          <Sprout className="w-12 h-12 text-gray-900" />
+        </div>
+      </div>
       <h2 className={styles.title}>Escolha seu Personagem</h2>
       <div className={styles.buttonsWrapper}>
         {/* Botão Feminino */}
