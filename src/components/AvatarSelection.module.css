@@ -1,0 +1,134 @@
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  /* remove parent padding/width constraints so images can fill the viewport */
+  padding: 0 !important;
+  margin: 0 !important;
+  background-color: white;
+  user-select: none;
+  width: 100vw !important;
+  max-width: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  overflow: hidden; /* keep overflow hidden to avoid expanding the page width */
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.title {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937; /* gray-800 */
+  margin: 0;
+  z-index: 40;
+}
+
+.buttonsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+.buttonContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.characterOverlay {
+  position: absolute;
+  width: auto;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.button {
+  width: 190vw !important;
+  max-width: 1400px !important;
+  height: auto !important;
+  object-fit: contain !important;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+.buttonRed {
+  width: 250vw !important;
+  max-width: 1400px !important;
+  height: auto !important;
+  object-fit: contain !important;
+  cursor: pointer;
+  transition: margin-right 0.3s ease, transform 0.3s ease;
+  display: block;
+  margin-right: -700px;
+  filter: drop-shadow(none);
+}
+
+.buttonRed:hover {
+  margin-right: -100px;
+  transform: scale(1.05);
+}
+
+.buttonBlue {
+  width: 250vw !important;
+  max-width: 1400px !important;
+  height: auto !important;
+  object-fit: contain !important;
+  cursor: pointer;
+  transition: margin-left 0.3s ease, transform 0.3s ease;
+  display: block;
+  margin-left: -700px;
+  filter: drop-shadow(none);
+}
+
+.buttonBlue:hover {
+  margin-left: -100px;
+  transform: scale(1.05);
+}
+
+/* Blur background when focused (hover) */
+.focusBlur {
+  filter: blur(6px) brightness(0.95);
+  transition: filter 0.35s ease;
+}
+
+/* Slight highlight for character on hover */
+.characterHighlight {
+  transform: scale(1.06);
+  transition: transform 0.35s ease, filter 0.35s ease;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.15));
+}
+
+/* Selected (clicked) state: bigger character and subtle glow) */
+.characterSelected {
+  transform: scale(1.18) !important;
+  margin-bottom: 40px;
+  transition: transform 0.35s ease, filter 0.35s ease;
+  filter: drop-shadow(0 18px 40px rgba(0,0,0,0.35));
+  z-index: 30;
+}
+
+/* Optional: darker/selected background state */
+.bgSelected {
+  transform: scale(1.02);
+  filter: blur(4px) brightness(0.9);
+  transition: transform 0.35s ease, filter 0.35s ease;
+}

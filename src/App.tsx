@@ -11,7 +11,8 @@ import { LocalsPE } from './components/LocalsPE';
 import { Stories } from './components/Stories';
 import { Support } from './components/Support';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from './firebase/firebase';
+import { auth, db } from './firebase/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomeFemale from './pages/homeFemale';
 import HomeMale from './pages/homeMale';
@@ -34,12 +35,34 @@ export default function App() {
 
   // Monitorar mudanças de autenticação
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUserId(currentUser.uid);
         setUserData((prev) => ({ ...prev, email: currentUser.email || '' }));
         setIsUserAuthenticated(true);
-        setCurrentStep('profile');
+
+        // Buscar dados do perfil no Firestore
+        try {
+          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUserData((prev) => ({
+              ...prev,
+              name: userData.name || '',
+              age: userData.age || 0,
+              email: currentUser.email || '',
+            }));
+            // Se já tem nome e idade preenchidos, pula para avatar
+            setCurrentStep('avatar');
+          } else {
+            // Se não tem perfil, mostra o formulário
+            setCurrentStep('profile');
+          }
+        } catch (error) {
+          console.error('Erro ao buscar dados do usuário:', error);
+          // Em caso de erro, mostra o formulário
+          setCurrentStep('profile');
+        }
       } else {
         setIsUserAuthenticated(false);
         setCurrentStep('auth');

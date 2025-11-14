@@ -1,14 +1,10 @@
-import React, { useState, useRef, useEffect, useMemo, Suspense } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { Canvas, useLoader } from '@react-three/fiber'
 import { OrbitControls, useGLTF } from '@react-three/drei'
-import { useNavigate } from 'react-router-dom'
 import * as THREE from 'three'
 import { useSpring, animated } from '@react-spring/three'
 import { GiHairStrands, GiLargeDress } from 'react-icons/gi'
 import { IoMdClose } from 'react-icons/io'
-import { useAuth } from '../auth/auth'
-import { useCharacters } from '../hooks/useCharacters'
-import ErrorBoundary from '../components/ErrorBoundary'
 import '../styles/home.css'
 
 // Main menu sections
@@ -117,22 +113,7 @@ const MAIN_SECTIONS = [
 
 // We'll load models directly in the component so we can render body + hairs inside the same group
 
-function Home({ onDone }) {
-  const navigate = useNavigate()
-  const { user, isAuthenticated, loading } = useAuth()
-  const { createCharacter, loading: charLoading } = useCharacters(user?.uid)
-  
-  const [showSaveModal, setShowSaveModal] = useState(false)
-  const [characterName, setCharacterName] = useState('')
-  const [savingError, setSavingError] = useState('')
-
-  // Redirect to root if not authenticated
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      navigate('/')
-    }
-  }, [loading, isAuthenticated, navigate])
-
+function Home() {
   // Model position presets
   const modelPresets = [
     {
@@ -305,7 +286,7 @@ function Home({ onDone }) {
   }, [hair0, hair1, hair2, culturalHair0, culturalHair1, culturalHair2, culturalHair3, 
       cacheado0, cacheado1, crespo0, crespo1, liso0, body0, body1, body2, face0, face1, face2])
 
-  const [selectedHair, setSelectedHair] = useState(16) // Start with Ondulado_2 pre-selected (id 16)
+  const [selectedHair, setSelectedHair] = useState(8) // Start with Cacheado_1 pre-selected (id 8)
   const [selectedSection, setSelectedSection] = useState(null) // null = show all sections, otherwise id of MAIN_SECTIONS
   const [selectedSubSection, setSelectedSubSection] = useState(null) // when a section has subSections, this selects the sub-card
 
@@ -314,27 +295,6 @@ function Home({ onDone }) {
   const [selectedBodyType, setSelectedBodyType] = useState('body1')
   const [selectedSkinColor, setSelectedSkinColor] = useState('skin1') // Default to 'Preto'
   const [selectedFaceOption, setSelectedFaceOption] = useState('face1') // Default to A1 (Preto)
-
-  // Load character from localStorage if exists
-  useEffect(() => {
-    try {
-      const savedCharacter = localStorage.getItem('selectedCharacter')
-      if (savedCharacter) {
-        const character = JSON.parse(savedCharacter)
-        
-        // Apply loaded character characteristics to state
-        if (character.bodyType) setSelectedBodyType(character.bodyType)
-        if (character.skinColor) setSelectedSkinColor(character.skinColor)
-        if (character.faceOption) setSelectedFaceOption(character.faceOption)
-        if (character.hairId) setSelectedHair(character.hairId)
-        
-        // Clear localStorage to prevent persistence issues
-        localStorage.removeItem('selectedCharacter')
-      }
-    } catch (error) {
-      console.error('Error loading saved character:', error)
-    }
-  }, [])
   
   // Função para gerar o caminho da textura do rosto baseado na seleção atual
   const getFaceTexturePath = (faceOption, skinColor) => {
@@ -682,142 +642,9 @@ function Home({ onDone }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [body0, body1, body2, selectedBodyType, orbitControlsRef.current])
 
-  // Função para salvar personagem
-  const handleSaveCharacter = async () => {
-    if (!characterName.trim()) {
-      setSavingError('Nome do personagem é obrigatório')
-      return
-    }
-
-    if (!user) {
-      setSavingError('Usuário não autenticado')
-      return
-    }
-
-    try {
-      setSavingError('')
-      await createCharacter({
-        characterName: characterName.trim(),
-        gender: 'FEMALE',
-        bodyType: selectedBodyType,
-        skinColor: selectedSkinColor,
-        faceOption: selectedFaceOption,
-        hairId: selectedHair,
-        description: '',
-      })
-
-      // Limpar formulário e fechar modal
-      setCharacterName('')
-      setShowSaveModal(false)
-      
-      // notify parent (App) that character was created
-      if (onDone) {
-        try { onDone({ avatar: characterName.trim() }) } catch (e) { /* ignore */ }
-      }
-
-      alert('Personagem salvo com sucesso!')
-    } catch (error) {
-      setSavingError(error.message || 'Erro ao salvar personagem')
-    }
-  }
-
-  const handleGoBack = () => {
-    navigate('/gender-select')
-  }
-
-  // Wrap the heavy GLTF canvas in Suspense + ErrorBoundary so missing assets don't crash the app
-  const CanvasWithSafety = ({ children }) => (
-    <ErrorBoundary>
-      <Suspense fallback={<div className="p-4">Carregando cena 3D...</div>}>
-        {children}
-      </Suspense>
-    </ErrorBoundary>
-  )
-
   return (
     <div className="home-page">
       <div className="viewer-container">
-        {/* Botões de ação no topo */}
-        <div className="character-actions">
-          <button className="btn-back" onClick={handleGoBack}>
-            ← Voltar
-          </button>
-          <button 
-            className="btn-save" 
-            onClick={() => setShowSaveModal(true)}
-            disabled={charLoading}
-          >
-            💾 Salvar Personagem
-          </button>
-        </div>
-
-        {/* Modal de salvar */}
-        {showSaveModal && (
-          <div className="modal-overlay">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h2>Salvar Personagem</h2>
-                <button 
-                  className="modal-close"
-                  onClick={() => {
-                    setShowSaveModal(false)
-                    setSavingError('')
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="modal-body">
-                <div className="form-group">
-                  <label htmlFor="characterName">Nome do Personagem</label>
-                  <input
-                    type="text"
-                    id="characterName"
-                    value={characterName}
-                    onChange={(e) => setCharacterName(e.target.value)}
-                    placeholder="Ex: Guerreira Nativa"
-                    disabled={charLoading}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSaveCharacter()}
-                  />
-                </div>
-
-                {savingError && (
-                  <div className="error-message">{savingError}</div>
-                )}
-
-                <div className="character-info">
-                  <p><strong>Gênero:</strong> Feminino</p>
-                  <p><strong>Corpo:</strong> Tipo {selectedBodyType.replace('body', '')}</p>
-                  <p><strong>Pele:</strong> {['', 'Preta', 'Parda', 'Indígena', 'Amarela', 'Branca'][parseInt(selectedSkinColor.replace('skin', ''))]}</p>
-                  <p><strong>Rosto:</strong> {['', 'A1', 'A2', 'A3', 'A4', 'A5'][parseInt(selectedFaceOption.replace('face', ''))]}</p>
-                  <p><strong>Cabelo:</strong> ID {selectedHair}</p>
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button 
-                  className="btn-cancel"
-                  onClick={() => {
-                    setShowSaveModal(false)
-                    setSavingError('')
-                  }}
-                  disabled={charLoading}
-                >
-                  Cancelar
-                </button>
-                <button 
-                  className="btn-confirm"
-                  onClick={handleSaveCharacter}
-                  disabled={charLoading || !characterName.trim()}
-                >
-                  {charLoading ? 'Salvando...' : 'Salvar'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* overlays */}
         <div className="overlay-top">
           <button onClick={() => setSelectedHair((s) => Math.max(0, s - 1))}>&lt;</button>
@@ -837,60 +664,58 @@ function Home({ onDone }) {
           </button>
         </div>
 
-        <CanvasWithSafety>
-          <Canvas camera={{ position: [0, 0, cameraDistance], fov: 75 }}>
-            <ambientLight intensity={1.2} />
-            <directionalLight position={[5, 5, 5]} intensity={1} />
-            <pointLight position={[10, 10, 10]} intensity={0.8} />
-            <pointLight position={[-10, -10, -10]} intensity={0.5} />
-            {/* Group that holds body + optional hair; group transform drives both */}
-            <animated.group
-              ref={groupRef}
-              position={springs.position}
-              rotation={springs.rotation}
-              scale={springs.scale}
-            >
-              {/* render currently selected body and corresponding face */}
-              {((() => {
-                // Select the correct body and face pair based on body type
-                const currentBody = selectedBodyType === 'body2' ? body1 : (selectedBodyType === 'body3' ? body2 : body0)
-                const currentFace = selectedBodyType === 'body2' ? face1 : (selectedBodyType === 'body3' ? face2 : face0)
-                
-                return (
-                  <>
-                    {currentBody && currentBody.scene && <primitive object={currentBody.scene} />}
-                    {currentFace && currentFace.scene && <primitive object={currentFace.scene} />}
-                  </>
-                )
-              })())}
-              {selectedHair === 1 && hair0 && <primitive object={hair0.scene} />}
-              {selectedHair === 2 && hair1 && <primitive object={hair1.scene} />}
-              {selectedHair === 3 && hair2 && <primitive object={hair2.scene} />}
-              {selectedHair === 4 && culturalHair0 && <primitive object={culturalHair0.scene} />}
-              {selectedHair === 5 && culturalHair1 && <primitive object={culturalHair1.scene} />}
-              {selectedHair === 6 && culturalHair2 && <primitive object={culturalHair2.scene} />}
-              {selectedHair === 7 && culturalHair3 && <primitive object={culturalHair3.scene} />}
-              {selectedHair === 13 && culturalHair4 && <primitive object={culturalHair4.scene} />}
-              {selectedHair === 8 && cacheado0 && <primitive object={cacheado0.scene} />}
-              {selectedHair === 9 && cacheado1 && <primitive object={cacheado1.scene} />}
-              {selectedHair === 10 && crespo0 && <primitive object={crespo0.scene} />}
-              {selectedHair === 11 && crespo1 && <primitive object={crespo1.scene} />}
-              {selectedHair === 12 && liso0 && <primitive object={liso0.scene} />}
-              {selectedHair === 14 && ondulado0 && <primitive object={ondulado0.scene} />}
-              {selectedHair === 15 && ondulado1 && <primitive object={ondulado1.scene} />}
-              {selectedHair === 16 && ondulado2 && <primitive object={ondulado2.scene} /> }
-            </animated.group>
+        <Canvas camera={{ position: [0, 0, cameraDistance], fov: 75 }}>
+          <ambientLight intensity={1.2} />
+          <directionalLight position={[5, 5, 5]} intensity={1} />
+          <pointLight position={[10, 10, 10]} intensity={0.8} />
+          <pointLight position={[-10, -10, -10]} intensity={0.5} />
+          {/* Group that holds body + optional hair; group transform drives both */}
+          <animated.group
+            ref={groupRef}
+            position={springs.position}
+            rotation={springs.rotation}
+            scale={springs.scale}
+          >
+            {/* render currently selected body and corresponding face */}
+            {((() => {
+              // Select the correct body and face pair based on body type
+              const currentBody = selectedBodyType === 'body2' ? body1 : (selectedBodyType === 'body3' ? body2 : body0)
+              const currentFace = selectedBodyType === 'body2' ? face1 : (selectedBodyType === 'body3' ? face2 : face0)
+              
+              return (
+                <>
+                  {currentBody && currentBody.scene && <primitive object={currentBody.scene} />}
+                  {currentFace && currentFace.scene && <primitive object={currentFace.scene} />}
+                </>
+              )
+            })())}
+            {selectedHair === 1 && hair0 && <primitive object={hair0.scene} />}
+            {selectedHair === 2 && hair1 && <primitive object={hair1.scene} />}
+            {selectedHair === 3 && hair2 && <primitive object={hair2.scene} />}
+            {selectedHair === 4 && culturalHair0 && <primitive object={culturalHair0.scene} />}
+            {selectedHair === 5 && culturalHair1 && <primitive object={culturalHair1.scene} />}
+            {selectedHair === 6 && culturalHair2 && <primitive object={culturalHair2.scene} />}
+            {selectedHair === 7 && culturalHair3 && <primitive object={culturalHair3.scene} />}
+            {selectedHair === 13 && culturalHair4 && <primitive object={culturalHair4.scene} />}
+            {selectedHair === 8 && cacheado0 && <primitive object={cacheado0.scene} />}
+            {selectedHair === 9 && cacheado1 && <primitive object={cacheado1.scene} />}
+            {selectedHair === 10 && crespo0 && <primitive object={crespo0.scene} />}
+            {selectedHair === 11 && crespo1 && <primitive object={crespo1.scene} />}
+            {selectedHair === 12 && liso0 && <primitive object={liso0.scene} />}
+            {selectedHair === 14 && ondulado0 && <primitive object={ondulado0.scene} />}
+            {selectedHair === 15 && ondulado1 && <primitive object={ondulado1.scene} />}
+            {selectedHair === 16 && ondulado2 && <primitive object={ondulado2.scene} /> }
+          </animated.group>
 
-            <OrbitControls
-              ref={orbitControlsRef}
-              enableZoom={false}
-              enablePan={false}
-              enableRotate={false}
-              minDistance={0.000001}
-              maxDistance={1e12}
-            />
-          </Canvas>
-        </CanvasWithSafety>
+          <OrbitControls
+            ref={orbitControlsRef}
+            enableZoom={false}
+            enablePan={false}
+            enableRotate={false}
+            minDistance={0.000001}
+            maxDistance={1e12}
+          />
+        </Canvas>
 
         <div className="overlay-bottom">
           <div className="hair-sections">
