@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Info } from 'lucide-react';
@@ -103,6 +104,7 @@ const avatars: AvatarOption[] = [
 export function AvatarSelection({ userName, onComplete }: AvatarSelectionProps) {
   const [selectedAvatar, setSelectedAvatar] = useState<string>('');
   const [showInfo, setShowInfo] = useState(true);
+  const navigate = useNavigate();
 
   const handleSubmit = () => {
     if (selectedAvatar) {
@@ -186,13 +188,27 @@ export function AvatarSelection({ userName, onComplete }: AvatarSelectionProps) 
           </div>
         )}
 
-        <Button 
-          onClick={handleSubmit} 
-          disabled={!selectedAvatar}
-          className="w-full bg-gray-900 hover:bg-gray-800 text-amber-400"
-        >
-          Começar Jornada
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            onClick={handleSubmit} 
+            disabled={!selectedAvatar}
+            className="flex-1 bg-gray-900 hover:bg-gray-800 text-amber-400"
+          >
+            Começar Jornada
+          </Button>
+          <Button
+            onClick={() => navigate('/home-female')}
+            className="flex-1 bg-amber-600 hover:bg-amber-500 text-white"
+          >
+            Criar 3D Feminino
+          </Button>
+          <Button
+            onClick={() => navigate('/home-male')}
+            className="flex-1 bg-sky-600 hover:bg-sky-500 text-white"
+          >
+            Criar 3D Masculino
+          </Button>
+        </div>
       </Card>
     </div>
   );
