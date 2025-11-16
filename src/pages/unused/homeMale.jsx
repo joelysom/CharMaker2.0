@@ -127,19 +127,19 @@ function Home({ onDone }) {
       cameraDistance: 0.24
     },
     {
-      position: [-0.02, -0.12, 0],
-      rotation: [-0.1, 3.14, 0], // Side view
+      position: [-0.001, -0.15, 0],
+      rotation: [-0.01, 3.14, 0], // Side view
       scale: [1, 1, 1],
       cameraDistance: 0.12
     },
     {
-      position: [0, -0.11, 0],
-      rotation: [0.4, 4.5, 0], // Angled view
+      position: [0, -0.14, 0],
+      rotation: [0.4, 4.6, 0], // Angled view
       scale: [1, 1, 1],
       cameraDistance: 0.18
     },
     {
-      position: [-0.02, -0.12, 0],
+      position: [-0.002, -0.14, 0],
       rotation: [0.3, 0, 0], // Front view
       scale: [1, 1, 1],
       cameraDistance: 0.16
@@ -165,49 +165,78 @@ function Home({ onDone }) {
   const [suppressControls, setSuppressControls] = useState(false)
 
   // load GLB files (body + hairs)
-  // Body variants: GBody_0.glb is Tipo 1 (default), GBody_1.glb = Tipo 2, GBody_2.glb = Tipo 3
-  const body0 = useGLTF('/models/female/GBody_0.glb')
-  const body1 = useGLTF('/models/female/GBody_1.glb')
-  const body2 = useGLTF('/models/female/GBody_2.glb')
+  // Body variants: MBody_0.glb is Tipo 1 (default), MBody_1.glb = Tipo 2, MBody_2.glb = Tipo 3
+  const body0 = useGLTF('/models/male/MBody_0.glb')
+  const body1 = useGLTF('/models/male/MBody_1.glb')
+  const body2 = useGLTF('/models/male/MBody_2.glb')
   
   // Face variants that correspond to body types
-  const face0 = useGLTF('/models/female/GFace_0.glb')
-  const face1 = useGLTF('/models/female/GFace_1.glb')
-  const face2 = useGLTF('/models/female/GFace_2.glb')
+  const face0 = useGLTF('/models/male/MFace_0.glb')
+  const face1 = useGLTF('/models/male/MFace_1.glb')
+  const face2 = useGLTF('/models/male/MFace_2.glb')
   
   // Straight hairs (1-3)
-  const hair0 = useGLTF('/models/female/GHair_0.glb')
-  const hair1 = useGLTF('/models/female/GHair_1.glb')
-  const hair2 = useGLTF('/models/female/GHair_2.glb')
+  const hair0 = useGLTF('/models/male/MHair_0.glb')
+  const hair1 = useGLTF('/models/male/MHair_1.glb')
+  const hair2 = useGLTF('/models/male/MHair_2.glb')
   // Cultural hairs (Cultural_0 .. Cultural_3 + Cultural_4) -> ids 4..7 and 13
-  const culturalHair0 = useGLTF('/models/female/Hair(FEMALE)/Cultural/Cultural_0.glb')
-  const culturalHair1 = useGLTF('/models/female/Hair(FEMALE)/Cultural/Cultural_1.glb')
-  const culturalHair2 = useGLTF('/models/female/Hair(FEMALE)/Cultural/Cultural_2.glb')
-  const culturalHair3 = useGLTF('/models/female/Hair(FEMALE)/Cultural/Cultural_3.glb')
-  const culturalHair4 = useGLTF('/models/female/Hair(FEMALE)/Cultural/Cultural_4.glb')
+  const culturalHair0 = useGLTF('/models/male/hair(MALE)/Cultural/Cultural_0.glb')
+  const culturalHair1 = useGLTF('/models/male/hair(MALE)/Cultural/Cultural_1.glb')
+  const culturalHair2 = useGLTF('/models/male/hair(MALE)/Cultural/Cultural_2.glb')
+  const culturalHair3 = useGLTF('/models/male/hair(MALE)/Cultural/Cultural_3.glb')
+  const culturalHair4 = useGLTF('/models/male/hair(MALE)/Cultural/Cultural_4.glb')
+  // Carregar textura do Cultural_4
+  const cultural4Texture = useMemo(() => {
+    const loader = new THREE.TextureLoader()
+    const texture = loader.load('/models/male/hair(MALE)/Cultural/Cultural_4.png')
+    texture.flipY = false
+    texture.encoding = THREE.sRGBEncoding
+    texture.colorSpace = THREE.SRGBColorSpace
+    return texture
+  }, [])
   // Cacheado (ids 8..9)
-  const cacheado0 = useGLTF('/models/female/Hair(FEMALE)/Cacheado/Cacheado_0.glb')
-  const cacheado1 = useGLTF('/models/female/Hair(FEMALE)/Cacheado/Cacheado_1.glb')
+  const cacheado0 = useGLTF('/models/male/hair(MALE)/Cacheado/Cacheado_0.glb')
+  const cacheado1 = useGLTF('/models/male/hair(MALE)/Cacheado/Cacheado_1.glb')
   // Crespo (ids 10..11)
-  const crespo0 = useGLTF('/models/female/Hair(FEMALE)/Crespo/Crespo_0.glb')
-  const crespo1 = useGLTF('/models/female/Hair(FEMALE)/Crespo/Crespo_1.glb')
+  const crespo0 = useGLTF('/models/male/hair(MALE)/Crespo/Crespo_0.glb')
+  const crespo1 = useGLTF('/models/male/hair(MALE)/Crespo/Crespo_1.glb')
   // Carregar textura do Crespo_1
   const crespo1Texture = useMemo(() => {
     const loader = new THREE.TextureLoader()
-    const texture = loader.load('/models/female/Hair(FEMALE)/Crespo/Crespo_1.png')
+    const texture = loader.load('/models/male/hair(MALE)/Crespo/Crespo_1.png')
     texture.flipY = false
     texture.encoding = THREE.sRGBEncoding
     texture.colorSpace = THREE.SRGBColorSpace
     return texture
   }, [])
   // Liso (ids 1..3 and 12)
-  const liso0 = useGLTF('/models/female/Hair(FEMALE)/Liso/Liso_0.glb')
+  const liso0 = useGLTF('/models/male/hair(MALE)/Liso/Liso_0.glb')
   // Ondulado (ids 14..16)
-  const ondulado0 = useGLTF('/models/female/Hair(FEMALE)/Ondulado/Ondulado_0.glb')
-  const ondulado1 = useGLTF('/models/female/Hair(FEMALE)/Ondulado/Ondulado_1.glb')
-  const ondulado2 = useGLTF('/models/female/Hair(FEMALE)/Ondulado/Ondulado_2.glb')
+  const ondulado0 = useGLTF('/models/male/hair(MALE)/Ondulado/Ondulado_0.glb')
+  const ondulado1 = useGLTF('/models/male/hair(MALE)/Ondulado/Ondulado_1.glb')
+  const ondulado2 = useGLTF('/models/male/hair(MALE)/Ondulado/Ondulado_2.glb')
 
   // Ensure all materials (body and hair) respect alpha/transparency. Run once when GLTFs load/change.
+  // Effect para aplicar a textura ao modelo Cultural_4
+  useEffect(() => {
+    if (culturalHair4 && culturalHair4.scene && cultural4Texture) {
+      culturalHair4.scene.traverse((child) => {
+        if (child.isMesh) {
+          const materials = Array.isArray(child.material) ? child.material : [child.material]
+          materials.forEach((mat) => {
+            if (!mat) return
+            mat.map = cultural4Texture
+            mat.transparent = true
+            mat.alphaTest = 0.7
+            mat.depthWrite = true
+            mat.side = THREE.DoubleSide
+            mat.needsUpdate = true
+          })
+        }
+      })
+    }
+  }, [culturalHair4, cultural4Texture])
+
   // Effect para aplicar a textura ao modelo Crespo_1
   useEffect(() => {
     if (crespo1 && crespo1.scene && crespo1Texture) {
@@ -290,16 +319,16 @@ function Home({ onDone }) {
   }, [hair0, hair1, hair2, culturalHair0, culturalHair1, culturalHair2, culturalHair3, 
       cacheado0, cacheado1, crespo0, crespo1, liso0, body0, body1, body2, face0, face1, face2])
 
-  const [selectedHair, setSelectedHair] = useState(8) // Start with Cacheado_1 pre-selected (id 8)
+  const [selectedHair, setSelectedHair] = useState(16) // Start with Ondulado_2 pre-selected (id 16)
   const [selectedSection, setSelectedSection] = useState(null) // null = show all sections, otherwise id of MAIN_SECTIONS
   const [selectedSubSection, setSelectedSubSection] = useState(null) // when a section has subSections, this selects the sub-card
 
   // lightweight selection state for body/face (placeholders for future behavior)
-  // default to Tipo 1 which corresponds to GBody_0.glb
+  // default to Tipo 1 which corresponds to MBody_0.glb
   const [selectedBodyType, setSelectedBodyType] = useState('body1')
-  const [selectedSkinColor, setSelectedSkinColor] = useState('skin1') // Default to 'Preto'
-  const [selectedFaceOption, setSelectedFaceOption] = useState('face1') // Default to A1 (Preto)
-
+  const [selectedSkinColor, setSelectedSkinColor] = useState('skin3') // Default to 'Indigena'
+  const [selectedFaceOption, setSelectedFaceOption] = useState('face3') // Default to A3 (Indigena)
+  
   // Load saved character for current user (if any) to initialize the editor
   useEffect(() => {
     let mounted = true
@@ -312,9 +341,7 @@ function Home({ onDone }) {
         const data = snap.data()
         if (!mounted) return
         if (data.bodyType) setSelectedBodyType(data.bodyType)
-        // `skinCode` stores the original skin id (e.g. 'skin1') in SaveCharacter
         if (data.skinCode) setSelectedSkinColor(data.skinCode)
-        // if SaveCharacter saved faceOption
         if (data.faceOption) setSelectedFaceOption(data.faceOption)
         if (typeof data.hairId === 'number') setSelectedHair(data.hairId)
       } catch (e) {
@@ -328,7 +355,7 @@ function Home({ onDone }) {
   
   // Função para gerar o caminho da textura do rosto baseado na seleção atual
   const getFaceTexturePath = (faceOption, skinColor) => {
-    const basePath = '/models/female/TEXTURES'
+    const basePath = '/models/male/TEXTURES'
     const selectedSkinFolder = skinIdToFolderName[skinColor] // Pasta da cor da pele atual (PRETO, PARDO, etc)
     const faceTextureName = faceTypeToTextureName[faceOption] // Tipo de rosto da opção selecionada (A1=PRETO, A2=PARDO, etc)
     
@@ -340,11 +367,11 @@ function Home({ onDone }) {
 
   // Mapa de texturas para cores de pele
   const skinTextureMap = {
-    skin1: '/models/female/TEXTURES/PRETO/CORPO_PRETO/PRETO.png',
-    skin2: '/models/female/TEXTURES/PARDO/CORPO_PARDO/PARDO.png',
-    skin3: '/models/female/TEXTURES/INDIGENA/CORPO_INDIGENA/INDIGENA.png',
-    skin4: '/models/female/TEXTURES/AMARELO/CORPO_AMARELO/AMARELO.png',
-    skin5: '/models/female/TEXTURES/BRANCO/CORPO_BRANCO/BRANCO.png'
+    skin1: '/models/male/TEXTURES/PRETO/CORPO_PRETO/PRETO.png',
+    skin2: '/models/male/TEXTURES/PARDO/CORPO_PARDO/PARDO.png',
+    skin3: '/models/male/TEXTURES/INDIGENA/CORPO_INDIGENA/INDIGENA.png',
+    skin4: '/models/male/TEXTURES/AMARELO/CORPO_AMARELO/AMARELO.png',
+    skin5: '/models/male/TEXTURES/BRANCO/CORPO_BRANCO/BRANCO.png'
   }
 
   // Mapeamento entre opção de rosto (A1-A5) e tom de pele
@@ -672,14 +699,14 @@ function Home({ onDone }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [body0, body1, body2, selectedBodyType, orbitControlsRef.current])
 
-  return ( 
+  return (
     <div className="home-page">
       <div className="viewer-container">
         {/* overlays */}
         <div className="overlay-top">
           <div style={{ marginLeft: 'auto' }}>
             <SaveButton
-              gender="female"
+              gender="male"
               selectedBodyType={selectedBodyType}
               selectedSkinColor={selectedSkinColor}
               selectedFaceOption={selectedFaceOption}
@@ -836,7 +863,7 @@ function Home({ onDone }) {
                           {sub.options.map(option => (
                             <button
                               key={option.id}
-                              className={`option-button  ${selectedHair === option.id ? 'active' : ''}`}
+                              className={`option-button ${selectedHair === option.id ? 'active' : ''}`}
                               onClick={() => {
                                 if (selectedSection === 'hair') {
                                   setSelectedHair(option.id)

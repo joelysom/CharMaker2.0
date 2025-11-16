@@ -71,7 +71,7 @@ export function AvatarSelection({ userName, onComplete }: AvatarSelectionProps) 
         </div>
       )}
 
-      <div className={styles.container}>
+      <div className={styles.container }>
         <div className={styles.logo}>
           <div className="bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
             <Sprout className="w-12 h-12 text-gray-900" />

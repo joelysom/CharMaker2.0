@@ -115,7 +115,7 @@ const MAIN_SECTIONS = [
   }
 ]
 
-// We'll load models directly in the component so we can render body + hairs inside the same group
+
 
 function Home({ onDone }) {
   // Model position presets
@@ -868,11 +868,11 @@ function Home({ onDone }) {
                                 if (selectedSection === 'hair') {
                                   setSelectedHair(option.id)
                                 } else if (selectedSection === 'body') {
-                                  // body sub-sections: identify by sub.id
+                                  
                                   if (sub.id === 'bodyTypes') setSelectedBodyType(option.id)
                                   if (sub.id === 'skinColor') setSelectedSkinColor(option.id)
                                 }
-                                // face handled elsewhere
+                          
                               }}
                             >
                               {option.label}

@@ -672,7 +672,7 @@ function Home({ onDone }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [body0, body1, body2, selectedBodyType, orbitControlsRef.current])
 
-  return ( 
+  return (
     <div className="home-page">
       <div className="viewer-container">
         {/* overlays */}
@@ -836,7 +836,7 @@ function Home({ onDone }) {
                           {sub.options.map(option => (
                             <button
                               key={option.id}
-                              className={`option-button  ${selectedHair === option.id ? 'active' : ''}`}
+                              className={`option-button ${selectedHair === option.id ? 'active' : ''}`}
                               onClick={() => {
                                 if (selectedSection === 'hair') {
                                   setSelectedHair(option.id)

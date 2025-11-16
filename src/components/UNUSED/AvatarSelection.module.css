@@ -8,7 +8,7 @@
   /* remove parent padding/width constraints so images can fill the viewport */
   padding: 0 !important;
   margin: 0 !important;
-   background: linear-gradient(180deg, #051f4d 0%, var(--bg) 100%)!important;
+  background-color: white;
   user-select: none;
   width: 100vw !important;
   max-width: none !important;
@@ -19,8 +19,6 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;
-  position: absolute;
-  top: 0;
 }
 
 .title {
@@ -31,7 +29,7 @@
   text-align: center;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #ececec; /* gray-800 */
+  color: #1f2937; /* gray-800 */
   margin: 0;
   z-index: 40;
 }
@@ -175,4 +173,3 @@
   filter: blur(4px) brightness(0.9);
   transition: transform 0.35s ease, filter 0.35s ease;
 }
-
