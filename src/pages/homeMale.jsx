@@ -191,7 +191,7 @@ function Home({ onDone }) {
     const loader = new THREE.TextureLoader()
     const texture = loader.load('/models/male/hair(MALE)/Cultural/Cultural_4.png')
     texture.flipY = false
-    texture.encoding = THREE.sRGBEncoding
+    texture.encoding = THREE. SRGBColorSpace
     texture.colorSpace = THREE.SRGBColorSpace
     return texture
   }, [])
@@ -206,7 +206,7 @@ function Home({ onDone }) {
     const loader = new THREE.TextureLoader()
     const texture = loader.load('/models/male/hair(MALE)/Crespo/Crespo_1.png')
     texture.flipY = false
-    texture.encoding = THREE.sRGBEncoding
+    texture.encoding = THREE. SRGBColorSpace
     texture.colorSpace = THREE.SRGBColorSpace
     return texture
   }, [])
@@ -333,7 +333,7 @@ function Home({ onDone }) {
 
             // Se houver map, garanta espaço de cor correto e force atualização
             if (mat.map) {
-              mat.map.encoding = THREE.sRGBEncoding
+              mat.map.encoding = THREE. SRGBColorSpace
               mat.map.needsUpdate = true
             }
 
@@ -491,7 +491,7 @@ function Home({ onDone }) {
     // Função para configurar a textura
     const setupTexture = (texture) => {
       texture.flipY = false
-      texture.encoding = THREE.sRGBEncoding
+      texture.encoding = THREE. SRGBColorSpace
       texture.colorSpace = THREE.SRGBColorSpace
       texture.minFilter = THREE.LinearFilter
       texture.magFilter = THREE.LinearFilter
@@ -526,7 +526,7 @@ function Home({ onDone }) {
     const loader = new THREE.TextureLoader()
     const setupTexture = (texture) => {
       texture.flipY = false
-      texture.encoding = THREE.sRGBEncoding
+      texture.encoding = THREE. SRGBColorSpace
       texture.colorSpace = THREE.SRGBColorSpace
       texture.minFilter = THREE.LinearFilter
       texture.magFilter = THREE.LinearFilter
