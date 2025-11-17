@@ -647,7 +647,7 @@ html,body,#root{
 
   .preset-arrows {
     margin-top: 500px;
-    top: 4%; /* Slightly closer to top on mobile */
+    top: -10%; /* Slightly closer to top on mobile */
   }
 
   .overlay-bottom{
@@ -673,7 +673,7 @@ html,body,#root{
   .preset-arrows{
   position: absolute;
   margin-top: 200px;
-  top: 30%;
+  top: 20%;
   left: 50%;
   transform: translate(-50%, -50%);
   
@@ -684,7 +684,7 @@ html,body,#root{
   .preset-arrows{
   position: absolute;
   margin-top: 200px;
-  top: 15%;
+  top: 20%;
   left: 50%;
   transform: translate(-50%, -50%);
   

@@ -49,7 +49,8 @@
         '@': path.resolve(__dirname, './src'),
       },
     },
-    build: {
+    base: "./",
+  build: {
     outDir: "dist"
   },
     server: {
