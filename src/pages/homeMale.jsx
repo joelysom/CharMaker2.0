@@ -159,7 +159,7 @@ function Home({ onDone }) {
   const [modelPosition, setModelPosition] = useState(defaultPosition)
   const [modelRotation, setModelRotation] = useState(defaultRotation)
   const [modelScale, setModelScale] = useState(defaultScale)
-  const [cameraDistance, setCameraDistance] = useState(defaultCameraDistance) // Ajuste este valor para alterar o zoom inicial
+  const [cameraDistance, setCameraDistance] = useState(defaultCameraDistance) // Ajustar este valor para alterar o zoom inicial
   const orbitControlsRef = useRef()
   const groupRef = useRef()
   const [initialFitDone, setInitialFitDone] = useState(false)
@@ -216,6 +216,43 @@ function Home({ onDone }) {
   const ondulado0 = useGLTF('/models/male/hair(MALE)/Ondulado/Ondulado_0.glb')
   const ondulado1 = useGLTF('/models/male/hair(MALE)/Ondulado/Ondulado_1.glb')
   const ondulado2 = useGLTF('/models/male/hair(MALE)/Ondulado/Ondulado_2.glb')
+
+  // Mapeia IDs de estado 
+  
+  const bodyModelMap = useMemo(() => ({
+    'body1': body0, // Tipo 1
+    'body2': body1, // Tipo 2
+    'body3': body2, // Tipo 3
+  }), [body0, body1, body2]);
+
+  const faceModelMap = useMemo(() => ({
+    'body1': face0, // Rosto correspondente ao Tipo 1
+    'body2': face1, // Rosto correspondente ao Tipo 2
+    'body3': face2, // Rosto correspondente ao Tipo 3
+  }), [face0, face1, face2]);
+
+  const hairModelMap = useMemo(() => ({
+    1: hair0,
+    2: hair1,
+    3: hair2,
+    4: culturalHair0,
+    5: culturalHair1,
+    6: culturalHair2,
+    7: culturalHair3,
+    8: cacheado0,
+    9: cacheado1,
+    10: crespo0,
+    11: crespo1,
+    12: liso0,
+    13: culturalHair4,
+    14: ondulado0,
+    15: ondulado1,
+    16: ondulado2,
+  }), [
+    hair0, hair1, hair2, culturalHair0, culturalHair1, culturalHair2,
+    culturalHair3, culturalHair4, cacheado0, cacheado1, crespo0,
+    crespo1, liso0, ondulado0, ondulado1, ondulado2
+  ]);
 
   // Ensure all materials (body and hair) respect alpha/transparency. Run once when GLTFs load/change.
   // Effect para aplicar a textura ao modelo Cultural_4
@@ -748,12 +785,10 @@ function Home({ onDone }) {
             position={springs.position}
             rotation={springs.rotation}
             scale={springs.scale}
-          >
-            {/* render currently selected body and corresponding face */}
-            {((() => {
-              // Select the correct body and face pair based on body type
-              const currentBody = selectedBodyType === 'body2' ? body1 : (selectedBodyType === 'body3' ? body2 : body0)
-              const currentFace = selectedBodyType === 'body2' ? face1 : (selectedBodyType === 'body3' ? face2 : face0)
+          >      
+            {(() => {
+              const currentBody = bodyModelMap[selectedBodyType];
+              const currentFace = faceModelMap[selectedBodyType]; 
               
               return (
                 <>
@@ -761,23 +796,17 @@ function Home({ onDone }) {
                   {currentFace && currentFace.scene && <primitive object={currentFace.scene} />}
                 </>
               )
-            })())}
-            {selectedHair === 1 && hair0 && <primitive object={hair0.scene} />}
-            {selectedHair === 2 && hair1 && <primitive object={hair1.scene} />}
-            {selectedHair === 3 && hair2 && <primitive object={hair2.scene} />}
-            {selectedHair === 4 && culturalHair0 && <primitive object={culturalHair0.scene} />}
-            {selectedHair === 5 && culturalHair1 && <primitive object={culturalHair1.scene} />}
-            {selectedHair === 6 && culturalHair2 && <primitive object={culturalHair2.scene} />}
-            {selectedHair === 7 && culturalHair3 && <primitive object={culturalHair3.scene} />}
-            {selectedHair === 13 && culturalHair4 && <primitive object={culturalHair4.scene} />}
-            {selectedHair === 8 && cacheado0 && <primitive object={cacheado0.scene} />}
-            {selectedHair === 9 && cacheado1 && <primitive object={cacheado1.scene} />}
-            {selectedHair === 10 && crespo0 && <primitive object={crespo0.scene} />}
-            {selectedHair === 11 && crespo1 && <primitive object={crespo1.scene} />}
-            {selectedHair === 12 && liso0 && <primitive object={liso0.scene} />}
-            {selectedHair === 14 && ondulado0 && <primitive object={ondulado0.scene} />}
-            {selectedHair === 15 && ondulado1 && <primitive object={ondulado1.scene} />}
-            {selectedHair === 16 && ondulado2 && <primitive object={ondulado2.scene} /> }
+            })()}
+
+            {(() => {
+              const currentHair = hairModelMap[selectedHair];
+              if (currentHair && currentHair.scene) {
+                return <primitive object={currentHair.scene} />;
+              }
+              return null;
+            })()}
+            
+
           </animated.group>
 
           <OrbitControls
@@ -865,7 +894,12 @@ function Home({ onDone }) {
                           {sub.options.map(option => (
                             <button
                               key={option.id}
-                              className={`option-button ${selectedHair === option.id ? 'active' : ''}`}
+                              className={`option-button ${
+                                (selectedSection === 'hair' && selectedHair === option.id) ||
+                                (selectedSection === 'body' && sub.id === 'bodyTypes' && selectedBodyType === option.id) ||
+                                (selectedSection === 'body' && sub.id === 'skinColor' && selectedSkinColor === option.id)
+                                ? 'active' : ''
+                              }`}
                               style={{ backgroundImage: option.img ? `url(${option.img})` : 'none', backgroundSize: 'cover' }}
                               onClick={() => {
                                 if (selectedSection === 'hair') {
