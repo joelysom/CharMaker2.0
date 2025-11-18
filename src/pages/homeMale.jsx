@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo, Suspense } from 'react'
+import React, { useState, useRef, useEffect, useMemo, useCallback, Suspense } from 'react'
 import SaveButton from '../components/SaveCharacter'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, useGLTF, useTexture } from '@react-three/drei'
@@ -63,7 +63,6 @@ const HAIR_MODELS = {
   5: '/models/male/hair(MALE)/Cultural/Cultural_1.glb',
   6: '/models/male/hair(MALE)/Cultural/Cultural_2.glb',
   7: '/models/male/hair(MALE)/Cultural/Cultural_3.glb',
-  13: '/models/male/hair(MALE)/Cultural/Cultural_4.glb', // Tem textura especial
 
   // Cacheado
   8: '/models/male/hair(MALE)/Cacheado/Cacheado_0.glb',
@@ -71,7 +70,7 @@ const HAIR_MODELS = {
 
   // Crespo
   10: '/models/male/hair(MALE)/Crespo/Crespo_0.glb',
-  11: '/models/male/hair(MALE)/Crespo/Crespo_1.glb', // Tem textura especial
+  11: '/models/male/hair(MALE)/Crespo/Crespo_1.glb',
 
   // Liso Extra
   12: '/models/male/hair(MALE)/Liso/Liso_0.glb',
@@ -103,7 +102,7 @@ function cleanMaterial(material) {
 // ==============================================================
 // 💇‍♂️ COMPONENTE DE CABELO INTELIGENTE (MALE)
 // ==============================================================
-const SmartHair = ({ hairId }) => {
+const SmartHair = ({ hairId, onLoaded }) => {
   const url = HAIR_MODELS[hairId]
   if (!url) return null
 
@@ -122,13 +121,8 @@ const SmartHair = ({ hairId }) => {
     }
   }, [clone])
 
-  // Texturas Especiais
-  let customTexturePath = null
-  if (hairId === 11) customTexturePath = '/models/male/hair(MALE)/Crespo/Crespo_1.png'
-  if (hairId === 13) customTexturePath = '/models/male/hair(MALE)/Cultural/Cultural_4.png'
-
-  const texturePathToLoad = customTexturePath || '/models/male/TEXTURES/PRETO/CORPO_PRETO/PRETO.png'
-  const texture = useTexture(texturePathToLoad)
+  // Nenhuma textura externa necessária (todos os cabelos usam textura embutida)
+  const texture = null
   
   useEffect(() => {
     clone.traverse((child) => {
@@ -139,21 +133,20 @@ const SmartHair = ({ hairId }) => {
         const materials = Array.isArray(child.material) ? child.material : [child.material]
         materials.forEach((mat) => {
           mat.transparent = true
-          mat.alphaTest = 0.8 // Corte duro para evitar transparência fantasma
+          mat.alphaTest = 0.9
           mat.depthWrite = true 
           mat.depthTest = true
           mat.side = THREE.DoubleSide
-          
-          if (customTexturePath) {
-            texture.flipY = false
-            texture.colorSpace = THREE.SRGBColorSpace
-            mat.map = texture
-            mat.needsUpdate = true
-          }
+          mat.needsUpdate = true
         })
       }
     })
-  }, [clone, customTexturePath, texture])
+    
+    // Notifica que o modelo está pronto após configuração
+    if (onLoaded) {
+      setTimeout(() => onLoaded(), 100)
+    }
+  }, [clone, onLoaded])
 
   return <primitive object={clone} dispose={null} />
 }
@@ -322,8 +315,7 @@ const MAIN_SECTIONS = [
           { id: 4,  img: '/MALE_READY/MALE_HAIR/Culturais/c0.png' },
           { id: 5, img: '/MALE_READY/MALE_HAIR/Culturais/c1.png' },
           { id: 6, img: '/MALE_READY/MALE_HAIR/Culturais/c2.png' },
-          { id: 7,  img: '/MALE_READY/MALE_HAIR/Culturais/c3.png' },
-          { id: 13,  img: '/MALE_READY/MALE_HAIR/Culturais/c4.png' }
+          { id: 7,  img: '/MALE_READY/MALE_HAIR/Culturais/c3.png' }
         ]
       },
       {
@@ -396,6 +388,19 @@ function Home({ onDone }) {
   
   const [activeSkinModal, setActiveSkinModal] = useState(null)
   const [shownSkinModals, setShownSkinModals] = useState(new Set())
+  const [isLoadingHair, setIsLoadingHair] = useState(false)
+  const previousHairRef = useRef(selectedHair)
+  const loadingTimerRef = useRef(null)
+  const hairLoadedRef = useRef(false)
+
+  // Callback memoizado para evitar loops
+  const handleHairLoaded = useCallback(() => {
+    hairLoadedRef.current = true
+    // Se já passou o tempo mínimo, pode fechar
+    if (!loadingTimerRef.current) {
+      setIsLoadingHair(false)
+    }
+  }, [])
 
   const skinColorInfo = {
     skin1: { title: '🧑🏿 Pele Preta', description: 'A pele preta representa a rica ancestralidade africana...' },
@@ -435,6 +440,29 @@ function Home({ onDone }) {
     }
   }, [selectedSection, selectedSubSection, selectedSkinColor, shownSkinModals])
 
+  useEffect(() => {
+    if (previousHairRef.current !== selectedHair) {
+      setIsLoadingHair(true)
+      previousHairRef.current = selectedHair
+      hairLoadedRef.current = false
+      loadingTimerRef.current = true
+      
+      // Tempo MÍNIMO de exibição do loading (1500ms)
+      const timer = setTimeout(() => {
+        loadingTimerRef.current = null
+        // Só fecha se o modelo já carregou
+        if (hairLoadedRef.current) {
+          setIsLoadingHair(false)
+        }
+      }, 1500)
+      
+      return () => {
+        clearTimeout(timer)
+        loadingTimerRef.current = null
+      }
+    }
+  }, [selectedHair])
+
   const springs = useSpring({
     position: modelPresets[currentPreset].position,
     rotation: modelPresets[currentPreset].rotation,
@@ -463,14 +491,14 @@ function Home({ onDone }) {
     if (initialFitDone) return
     const controls = orbitControlsRef.current
     if (!controls) return
-    const center = new THREE.Vector3(0, 0.8, 0) 
+    const center = new THREE.Vector3(0, 0, 0) 
     const dist = modelPresets[0].cameraDistance
     const cam = controls.object
     cam.position.set(center.x, center.y, center.z + dist)
     controls.target.copy(center)
     controls.update()
     setInitialFitDone(true)
-  }, [orbitControlsRef.current])
+  }, [initialFitDone])
 
   return ( 
     <div className="home-page">
@@ -524,7 +552,7 @@ function Home({ onDone }) {
             
             <ErrorBoundary resetKey={selectedHair}>
                 <Suspense fallback={null}>
-                    <SmartHair hairId={selectedHair} />
+                    <SmartHair hairId={selectedHair} onLoaded={handleHairLoaded} />
                 </Suspense>
             </ErrorBoundary>
             
@@ -652,6 +680,42 @@ function Home({ onDone }) {
             <button className="skin-modal-close" onClick={closeSkinModal}><IoMdClose size={20} /></button>
             <h3>{skinColorInfo[activeSkinModal].title}</h3>
             <p>{skinColorInfo[activeSkinModal].description}</p>
+          </div>
+        </div>
+      )}
+
+      {isLoadingHair && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
+          gap: '20px'
+        }}>
+          <img 
+            src="/charmaker/aruanarunning.gif" 
+            alt="Carregando..." 
+            style={{ 
+              width: '200px', 
+              height: '200px',
+              objectFit: 'contain'
+            }}
+          />
+          <div style={{
+            fontSize: '32px',
+            fontWeight: 'bold',
+            color: '#fff',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+            animation: 'pulse 1.5s ease-in-out infinite'
+          }}>
+            Carregando...
           </div>
         </div>
       )}

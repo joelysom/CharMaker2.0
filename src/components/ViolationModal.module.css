@@ -11,12 +11,17 @@
   background-color: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  overflow-y: auto; /* Permite rolagem no overlay */
 }
 
 .modalContainer {
   z-index: 51;
   width: 100%;
   max-width: 32rem;
+  margin: auto; /* Centraliza verticalmente quando há rolagem */
+  max-height: calc(100vh - 2rem); /* Garante que não ultrapasse a viewport */
+  display: flex;
+  flex-direction: column;
 }
 
 .card {
@@ -25,6 +30,9 @@
   border-radius: 0.75rem;
   background: white;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
 }
 
 .header {
@@ -32,6 +40,7 @@
   padding: 1.5rem;
   color: white;
   position: relative;
+  flex-shrink: 0; /* Impede que o header encolha */
 }
 
 .headerContent {
@@ -51,6 +60,7 @@
   justify-content: center;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  flex-shrink: 0;
 }
 
 .iconCircle span {
@@ -98,6 +108,8 @@
 .content {
   padding: 1.5rem;
   background: linear-gradient(to bottom, white, rgb(254, 242, 242));
+  overflow-y: auto; /* Permite rolagem no conteúdo */
+  flex-grow: 1; /* Permite que o conteúdo cresça */
 }
 
 .section {
@@ -123,6 +135,7 @@
   font-weight: 700;
   font-size: 1rem;
   margin: 0;
+  word-break: break-word; /* Quebra palavras longas em telas pequenas */
 }
 
 .sectionLabel {
@@ -148,6 +161,7 @@
   font-size: 0.875rem;
   line-height: 1.5;
   margin: 0;
+  word-break: break-word; /* Quebra palavras longas em telas pequenas */
 }
 
 .guidelines {
@@ -185,6 +199,7 @@
 
 .gifWrapper {
   position: relative;
+  max-width: 100%; /* Garante que não ultrapasse a largura em mobile */
 }
 
 .gifGlow {
@@ -214,8 +229,10 @@
 }
 
 .gifImage {
-  width: 18rem;
-  height: 18rem;
+  width: 100%;
+  max-width: 18rem;
+  height: auto;
+  aspect-ratio: 1; /* Mantém proporção quadrada */
   object-fit: contain;
   position: relative;
   z-index: 10;
@@ -225,6 +242,7 @@
 .buttonContainer {
   display: flex;
   justify-content: center;
+  padding-top: 0.5rem;
 }
 
 .confirmButton {
@@ -238,6 +256,8 @@
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   cursor: pointer;
   transition: all 0.2s;
+  width: 100%; /* Botão ocupa toda largura em mobile */
+  max-width: 20rem; /* Mas não fica muito largo em desktop */
 }
 
 .confirmButton:hover {
@@ -247,4 +267,45 @@
 
 .confirmButton:active {
   transform: scale(0.95);
+}
+
+/* Media queries para mobile */
+@media (max-width: 640px) {
+  .overlay {
+    padding: 0.5rem;
+  }
+
+  .modalContainer {
+    max-height: calc(100vh - 1rem);
+  }
+
+  .header {
+    padding: 1rem;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.125rem;
+  }
+
+  .iconCircle {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .iconCircle span {
+    font-size: 1.25rem;
+  }
+
+  .gifImage {
+    max-width: 14rem;
+  }
+
+  .confirmButton {
+    font-size: 0.8125rem;
+    padding: 0.625rem 1.25rem;
+  }
 }
